@@ -6,11 +6,11 @@ function App() {
     <div className="App">
       <main className="home-container">
         <section className="hero-section">
-          <h1>Hi, I'm Moaz</h1>
-          <h2>Software Developer</h2>
+          <h1> 👋 Hi, I'm Moaz</h1>
+          <h2>Software Developer Intern @ ISED</h2>
           <p className="intro-text">
-            I create beautiful, functional websites with modern technologies.
-            Passionate about building user-friendly digital experiences.
+            I develop solutions to problems I encounter or things I think are cool.
+            Passionate about new technologies with a specific interest in Embedded Systems and Quantum Computing.
           </p>
           <div className="cta-buttons">
             <a href="#projects" className="primary-button">View My Work</a>
