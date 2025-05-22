@@ -56,7 +56,7 @@ function App() {
                 neural networks and embedded systems (FPGAs specifically).
               </p>
               <p>
-                When I'm away from my computer, you can find me on hikes, at the gym, or playing one of the many sports I enjoy. 
+                When I'm away from my computer, you can find me on hikes, at the gym, or playing one of the many sports I enjoy.. 
               </p>
             </div>
           </div>
