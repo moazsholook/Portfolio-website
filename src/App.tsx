@@ -59,7 +59,7 @@ function App() {
             <div className="about-content">
               <div className="about-text">
                 <p>
-                  👋 Hi! I'm Moaz - A third-year student at Computer Science student at Carleton University, where I combine
+                  <span className="wave-emoji">👋</span> Hi! I'm Moaz - A third-year student at Computer Science student at Carleton University, where I combine
                   knowledge of operating systems, data structures, and circuits to build all types of solutions, from predictive 
                   AI models to prosthetic limbs 🦾. 
                 </p>
