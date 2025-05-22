@@ -53,7 +53,7 @@ function App() {
               </p>
               <p>
                 I do a lot of self-learning when it comes to technology. My current research interests include Quantum Computing, 
-                neural networks and embedded systems (FPGAs specifically).
+                neural networks and Embedded Systems (FPGAs specifically).
               </p>
               <p>
                 When I'm away from my computer, you can find me on hikes, at the gym, or playing one of the many sports I enjoy. 
