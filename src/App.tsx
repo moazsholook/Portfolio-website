@@ -29,6 +29,7 @@ function App() {
               <div className="cta-buttons">
                 <a href="#projects" className="primary-button">My Resume</a>
                 <a href="#contact" className="secondary-button">Contact Me</a>
+                <a href="" className="tertiary-button">My Projects</a>
               </div>
             </div>
             <div className="hero-image">
