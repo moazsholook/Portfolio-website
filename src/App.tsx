@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import './App.css';
-import websitePhoto from './webphoto.png';
+import websitePhoto from './OSAH2023-original.jpeg';
 import insulinPumpPhoto from './insulin_pump_image.png'
 import plDatabasePhoto from './PL_Database_image.png';
 import momentoPhoto from './Momento.jpeg';
-import resumePDF from './Moaz_Sholook_Shopify_Fall_2025 copy.pdf';
+import softwareResumePDF from './Moaz_Sholook_Software_Development_Resume.pdf';
+import embeddedResumePDF from './Moaz_Sholook_Embedded_C_C___Resume.pdf';
 import { IconContext } from 'react-icons';
 import { FaEnvelope, FaLinkedin, FaGithub, FaCode, FaMoon, FaSun } from 'react-icons/fa';
 
@@ -43,7 +44,8 @@ function App() {
                 <h1>Hi, I'm Moaz Sholook</h1>
                 <h2>Software Development Intern @ ISED</h2>
                 <div className="cta-buttons">
-                  <a href={resumePDF} target="_blank" rel="noopener noreferrer" className="primary-button">My Resume</a>
+                  <a href={softwareResumePDF} target="_blank" rel="noopener noreferrer" className="primary-button">Software Resume</a>
+                  <a href={embeddedResumePDF} target="_blank" rel="noopener noreferrer" className="primary-button">Embedded Resume</a>
                   <a href="#contact" className="secondary-button">Contact Me</a>
                 </div>
               </div>
