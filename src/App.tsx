@@ -59,7 +59,7 @@ function App() {
             <div className="about-content">
               <div className="about-text">
                 <p>
-                  <span className="wave-emoji">👋</span> Hi! I'm Moaz - A third-year Computer Science Student at Carleton University, where I combine
+                  <span className="wave-emoji">👋</span> Hi! I'm Moaz - A fourth-year Computer Science Student at Carleton University, where I combine
                   knowledge of operating systems, data structures, and circuits to build all types of solutions, from predictive 
                   AI models to prosthetic limbs 🦾. 
                 </p>
@@ -90,7 +90,7 @@ function App() {
                   <li>Carleton University</li>
                   <li>Bachelor of Computer Science</li>
                   <li>SWE & ML Stream</li>
-                  <li>GPA: 3.3/4.0</li>
+                  <li>GPA: 3.5/4.0</li>
                 </ul>
               </div>
             </div>
