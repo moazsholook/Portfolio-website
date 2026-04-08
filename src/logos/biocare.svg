@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="12" fill="#1a1a2e"/>
+  <g transform="translate(100,85)">
+    <path d="M0,45 C-60,-15 -60,-55 -30,-70 C-10,-80 0,-60 0,-45 C0,-60 10,-80 30,-70 C60,-55 60,-15 0,45Z" fill="#e94560" opacity="0.9"/>
+    <path d="M-12,-25 L12,-25 L12,-13 L24,-13 L24,5 L12,5 L12,17 L-12,17 L-12,5 L-24,5 L-24,-13 L-12,-13Z" fill="white" opacity="0.9"/>
+  </g>
+  <text x="100" y="165" text-anchor="middle" fill="#e0e0e0" font-family="Arial,sans-serif" font-size="20" font-weight="700">BioCARE</text>
+</svg>

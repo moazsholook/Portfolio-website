@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="12" fill="#E8112D"/>
+  <g transform="translate(100,90) scale(0.55)">
+    <path d="M0,-120 L14,-56 L80,-56 L26,-16 L46,48 L0,8 L-46,48 L-26,-16 L-80,-56 L-14,-56 Z" fill="none"/>
+    <path d="M-5.5,-91.4 L0,-58.7 L-38.3,-36.4 L-21.7,-36.4 L-33.3,0 L-18.7,-6.3 L-18.7,14 L0,0 L18.7,14 L18.7,-6.3 L33.3,0 L21.7,-36.4 L38.3,-36.4 L0,-58.7 L5.5,-91.4 L0,-70 Z" fill="white"/>
+  </g>
+  <text x="100" y="165" text-anchor="middle" fill="white" font-family="Arial,sans-serif" font-size="22" font-weight="700" letter-spacing="1">CANADA</text>
+</svg>
