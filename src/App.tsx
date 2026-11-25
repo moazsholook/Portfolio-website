@@ -7,7 +7,6 @@ import isedLogo from './ISED_Canada_Logo.jpg';
 import biocareLogo from './logos/biocare-logo-full.png';
 import terminalLogo from './terminal-logo.svg';
 import ecolensImg from './ecolens-screenshot.png';
-import insulinPumpImg from './insulin-pump-screenshot.png';
 import jingeImg from './jinge-gallery.jpg';
 import wchewsImg from './wchews-screenshot.jpg';
 import batchhatchImg from './batchhatch-screenshot.jpg';
@@ -136,18 +135,7 @@ const projects: Project[] = [
       { label: 'GitHub', url: 'https://github.com/Yxxxxs/Brightspace-mcp-server' },
     ],
   },
-  {
-    name: 'Insulin Pump Simulator',
-    badge: 'Demo',
-    description:
-      'Full-featured t:slim insulin pump simulator with complete UI and control logic.',
-    tech: ['Qt', 'C++'],
-    image: insulinPumpImg,
-    links: [
-      { label: 'GitHub', url: 'https://github.com/moazsholook/COMP3004_Proj' },
-      { label: 'Demo', url: 'https://www.youtube.com/watch?v=2lVR6Kb2LBk' },
-    ],
-  },
+
 ];
 
 const skillCategories = [
