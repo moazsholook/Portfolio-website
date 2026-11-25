@@ -10,6 +10,7 @@ import ecolensImg from './ecolens-screenshot.png';
 import jingeImg from './jinge-gallery.jpg';
 import wchewsImg from './wchews-screenshot.jpg';
 import batchhatchImg from './batchhatch-screenshot.jpg';
+import northwindImg from './northwind-screenshot.jpg';
 
 /* ---------------------------------- data ---------------------------------- */
 
@@ -109,6 +110,18 @@ const projects: Project[] = [
       { label: 'Live Demo', url: 'https://batchhatch.work' },
       { label: 'GitHub', url: 'https://github.com/omarismail-cs/BatchHatch' },
       { label: 'Devpost', url: 'https://devpost.com/software/batchhatch' },
+    ],
+  },
+  {
+    name: 'Northwind Complaint Recovery',
+    badge: 'Hack the Hill III · CGI Challenge',
+    description:
+      'A data briefing on why 68% of 1,599 open utility complaints are bad bills from estimated reads, with an interactive dashboard and a plan for a bill gate and a single agent screen.',
+    tech: ['JavaScript', 'HTML/CSS', 'Python', 'Data Analysis'],
+    image: northwindImg,
+    links: [
+      { label: 'Live Demo', url: 'https://moazsholook.github.io/northwind-complaint-recovery/' },
+      { label: 'GitHub', url: 'https://github.com/moazsholook/northwind-complaint-recovery' },
     ],
   },
   {
