@@ -1,16 +1,11 @@
-body {
-  margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
-    'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background: #0f0f0f;
-  color: #ebebeb;
-  transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-              color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+html {
+  scroll-behavior: smooth;
 }
 
-body.light-mode {
-  background: #ffffff;
-  color: #171717;
+body {
+  margin: 0;
+  font-family: Tahoma, 'MS Sans Serif', Geneva, Verdana, sans-serif;
+  -webkit-font-smoothing: none;
+  background: #008080;
+  color: #000;
 }

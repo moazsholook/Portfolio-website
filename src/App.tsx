@@ -1,442 +1,581 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './App.css';
 import webPhoto from './OSAH2023-original.2f4567c88a1f1cdeeac8.jpeg';
 import resumePDF from './Moaz_Sholook_SWE_Fall_2026_Resume.pdf';
 import shopifyLogo from './shopify-logo.png';
 import isedLogo from './ISED_Canada_Logo.jpg';
 import biocareLogo from './logos/biocare-logo-full.png';
+import terminalLogo from './terminal-logo.svg';
 import ecolensImg from './ecolens-screenshot.png';
 import insulinPumpImg from './insulin-pump-screenshot.png';
-import { IconContext } from 'react-icons';
-import {
-  FaEnvelope, FaLinkedin, FaGithub, FaMoon, FaSun,
-  FaBars, FaTimes, FaExternalLinkAlt, FaPlay,
-  FaTrophy, FaUsers, FaArrowRight, FaChevronDown
-} from 'react-icons/fa';
+import jingeImg from './jinge-gallery.jpg';
 
-function AnimateOnScroll({ children, className = '', delay = 0 }: {
-  children: React.ReactNode;
-  className?: string;
-  delay?: number;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
+/* ---------------------------------- data ---------------------------------- */
 
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsVisible(entry.isIntersecting),
-      { threshold: 0.05 }
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
+const roles = [
+  'Incoming SWE Intern @ Terminal (YC S23)',
+  'CS Student @ Carleton University',
+  'Full-Stack Developer',
+  'AI/ML + CV Tinkerer',
+];
 
-  return (
-    <div
-      ref={ref}
-      className={`fade-in ${isVisible ? 'visible' : ''} ${className}`}
-      style={{ transitionDelay: `${delay}ms` }}
-    >
-      {children}
-    </div>
-  );
+interface WorkCard {
+  company: string;
+  sub?: string;
+  role: string;
+  dates?: string;
+  logo: string;
+  link: string;
+  incoming?: boolean;
+  tech: string[];
 }
 
-const workCards = [
+const workCards: WorkCard[] = [
+  {
+    company: 'Terminal',
+    sub: 'YC S23 · Toronto',
+    role: 'Software Engineering Intern — Backend',
+    dates: 'Jan 2027 – Apr 2027',
+    logo: terminalLogo,
+    link: 'https://withterminal.com',
+    incoming: true,
+    tech: ['Backend', 'Winter 2027'],
+  },
   {
     company: 'Shopify',
     role: 'Software Engineering Intern',
     logo: shopifyLogo,
-    bgColor: '#95bf47',
-    borderColor: '#7da83c',
-    invertLogo: true,
-    tech: ['Ruby', 'Rails', 'React', 'TypeScript', 'GraphQL'],
     link: 'https://shopify.com',
+    tech: ['Ruby', 'Rails', 'React', 'TypeScript', 'GraphQL'],
   },
   {
     company: 'ISED Canada',
     role: 'Software Engineering Intern',
     logo: isedLogo,
-    bgColor: '#ffffff',
-    borderColor: '#e8112d',
-    tech: ['JavaScript', 'Spring Boot', 'Node.js'],
     link: 'https://ised-isde.canada.ca',
+    tech: ['JavaScript', 'Spring Boot', 'Node.js'],
   },
 ];
 
-const projects = [
+interface ProjectLink {
+  label: string;
+  url: string;
+}
+
+interface Project {
+  name: string;
+  badge: string;
+  description: string;
+  tech: string[];
+  image?: string;
+  links: ProjectLink[];
+}
+
+const projects: Project[] = [
+  {
+    name: 'Wchews',
+    badge: 'Stupid Ideas Hackathon 2026 · Solo Build',
+    description:
+      'Scan a meal and get a 0–100 score with a verdict from CERTIFIED L NIBBLES to ABSOLUTE CINEMA. No ML — every stat is a hand-built OpenCV measurement, served with a roast, a meme and Discord sharing.',
+    tech: ['Python', 'Flask', 'OpenCV', 'NumPy'],
+    links: [{ label: 'Devpost', url: 'https://devpost.com/software/wchews' }],
+  },
+  {
+    name: 'Jinge',
+    badge: 'Stupid Ideas Hackathon 2026 · Team of 4',
+    description:
+      "Find love. Protect shareholder value. A dating sim where every dialogue choice moves hearts and the stock price. Branching chats, date rounds, and one rule: don't tank the stock.",
+    tech: ['TypeScript', 'Next.js', 'CSS'],
+    image: jingeImg,
+    links: [
+      { label: 'GitHub', url: 'https://github.com/catOnKeyboardd/TheAffair' },
+      { label: 'Demo', url: 'https://youtu.be/tUfkN8cRu10' },
+      { label: 'Devpost', url: 'https://devpost.com/software/jinge' },
+    ],
+  },
   {
     name: 'EcoLens',
-    badge: 'Hackathon',
-    badgeIcon: <FaTrophy />,
-    description: 'Scan any product to see its carbon footprint, discover alternatives, and build your EcoScore.',
+    badge: 'uOttaHack 2026',
+    description:
+      'Scan any product to see its carbon footprint, discover alternatives, and build your EcoScore.',
     tech: ['React', 'Python', 'AI/ML'],
-    github: 'https://github.com/ismailahmed1/eco-lens',
-    demo: 'https://www.linkedin.com/feed/update/urn:li:activity:7419584688849260544/',
-    event: 'uOttaHack 2026',
     image: ecolensImg,
-    borderColor: '#36ae57',
+    links: [
+      { label: 'GitHub', url: 'https://github.com/ismailahmed1/eco-lens' },
+      {
+        label: 'Demo',
+        url: 'https://www.linkedin.com/feed/update/urn:li:activity:7419584688849260544/',
+      },
+    ],
   },
   {
     name: 'Brightspace MCP Server',
     badge: '20+ Active Users',
-    badgeIcon: <FaUsers />,
-    description: 'Open-source MCP server connecting D2L Brightspace with AI assistants like Claude and Cursor.',
+    description:
+      'Open-source MCP server connecting D2L Brightspace with AI assistants like Claude and Cursor.',
     tech: ['TypeScript', 'Playwright', 'MCP'],
-    github: 'https://github.com/Yxxxxs/Brightspace-mcp-server',
-    borderColor: '#0066ff',
+    links: [
+      { label: 'GitHub', url: 'https://github.com/Yxxxxs/Brightspace-mcp-server' },
+    ],
   },
   {
     name: 'Insulin Pump Simulator',
     badge: 'Demo',
-    badgeIcon: <FaPlay />,
-    description: 'Full-featured t:slim insulin pump simulator with complete UI and control logic.',
+    description:
+      'Full-featured t:slim insulin pump simulator with complete UI and control logic.',
     tech: ['Qt', 'C++'],
-    github: 'https://github.com/moazsholook/COMP3004_Proj',
-    demo: 'https://www.youtube.com/watch?v=2lVR6Kb2LBk',
     image: insulinPumpImg,
-    borderColor: '#8b5cf6',
+    links: [
+      { label: 'GitHub', url: 'https://github.com/moazsholook/COMP3004_Proj' },
+      { label: 'Demo', url: 'https://www.youtube.com/watch?v=2lVR6Kb2LBk' },
+    ],
   },
 ];
 
 const skillCategories = [
   { name: 'Languages', items: ['Ruby', 'TypeScript', 'JavaScript', 'Python', 'Java', 'C/C++', 'SQL', 'Go', 'Swift', 'HTML/CSS'] },
   { name: 'Frameworks', items: ['Ruby on Rails', 'React.js', 'Node.js/Express', 'Next.js', 'Angular', 'Spring Boot', 'Flask', 'FastAPI'] },
-  { name: 'Libraries & APIs', items: ['GraphQL', 'Tailwind CSS', 'Playwright', 'React Polaris', 'TensorFlow', 'PyTorch'] },
+  { name: 'Libraries & APIs', items: ['GraphQL', 'OpenCV', 'Tailwind CSS', 'Playwright', 'React Polaris', 'TensorFlow', 'PyTorch'] },
   { name: 'Developer Tools', items: ['Git', 'Linux', 'Docker', 'BigQuery', 'AWS', 'Azure', 'Postman', 'JIRA', 'Jenkins'] },
   { name: 'Databases', items: ['MySQL', 'PostgreSQL', 'MongoDB', 'Redis'] },
   { name: 'AI Tools', items: ['Claude Code', 'Codex', 'Cursor'] },
 ];
 
-const roles = ['Software Engineering Intern @ Shopify', 'CS Student @ Carleton University', 'Full-Stack Developer', 'AI/ML Enthusiast'];
+const palette = [
+  '#000000', '#808080', '#800000', '#808000', '#008000', '#008080', '#000080',
+  '#800080', '#808040', '#004040', '#0080ff', '#004080', '#8000ff', '#804000',
+  '#ffffff', '#c0c0c0', '#ff0000', '#ffff00', '#00ff00', '#00ffff', '#0000ff',
+  '#ff00ff', '#ffff80', '#00ff80', '#80ffff', '#8080ff', '#ff0080', '#ff8040',
+];
+
+const tools = [
+  { id: 'select', label: 'Select', cursor: 'default' },
+  { id: 'eraser', label: 'Eraser', cursor: 'cell' },
+  { id: 'fill', label: 'Fill With Color', cursor: 'crosshair' },
+  { id: 'pick', label: 'Pick Color', cursor: 'crosshair' },
+  { id: 'zoom', label: 'Magnifier', cursor: 'zoom-in' },
+  { id: 'pencil', label: 'Pencil', cursor: 'crosshair' },
+  { id: 'brush', label: 'Brush', cursor: 'crosshair' },
+  { id: 'airbrush', label: 'Airbrush', cursor: 'crosshair' },
+  { id: 'text', label: 'Text', cursor: 'text' },
+  { id: 'line', label: 'Line', cursor: 'crosshair' },
+  { id: 'curve', label: 'Curve', cursor: 'crosshair' },
+  { id: 'rect', label: 'Rectangle', cursor: 'crosshair' },
+  { id: 'polygon', label: 'Polygon', cursor: 'crosshair' },
+  { id: 'ellipse', label: 'Ellipse', cursor: 'crosshair' },
+];
+
+function ToolIcon({ id }: { id: string }) {
+  switch (id) {
+    case 'select':
+      return (<svg viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" fill="none" stroke="#000" strokeDasharray="2 1" /></svg>);
+    case 'eraser':
+      return (<svg viewBox="0 0 16 16"><rect x="3" y="8" width="9" height="6" fill="#ff80c0" stroke="#000" /><rect x="5" y="5" width="7" height="3" fill="#fff" stroke="#000" /></svg>);
+    case 'fill':
+      return (<svg viewBox="0 0 16 16"><path d="M4 2 h6 v4 h-6 z" fill="#000" /><path d="M10 4 l3 3 -6 6 -3 -3 z" fill="#808080" stroke="#000" /><rect x="12" y="12" width="2" height="2" fill="#000" /></svg>);
+    case 'pick':
+      return (<svg viewBox="0 0 16 16"><path d="M2 14 L9 7" stroke="#000" strokeWidth="1.5" /><path d="M8 8 L12 4 L13 5 L9 9 Z" fill="#000" /><path d="M11 3 L14 6" stroke="#000" strokeWidth="1.5" /></svg>);
+    case 'zoom':
+      return (<svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="4" fill="none" stroke="#000" strokeWidth="1.5" /><path d="M9 9 L14 14" stroke="#000" strokeWidth="2" /></svg>);
+    case 'pencil':
+      return (<svg viewBox="0 0 16 16"><path d="M2 14 L3.5 10.5 L11 3 L13 5 L5.5 12.5 Z" fill="#000" /><path d="M2 14 L3 13 L2.5 12.5 Z" fill="#000" /></svg>);
+    case 'brush':
+      return (<svg viewBox="0 0 16 16"><path d="M3 13 L10 6 L12 8 L5 15 L2 15 Z" fill="#000" /><rect x="10" y="3" width="4" height="3" transform="rotate(45 12 4.5)" fill="#000" /></svg>);
+    case 'airbrush':
+      return (<svg viewBox="0 0 16 16"><rect x="2" y="9" width="5" height="4" fill="#000" /><rect x="8" y="6" width="1.5" height="1.5" fill="#000" /><rect x="11" y="4" width="1.5" height="1.5" fill="#000" /><rect x="13" y="7" width="1.5" height="1.5" fill="#000" /><rect x="10" y="9" width="1.5" height="1.5" fill="#000" /><rect x="13" y="1" width="1.5" height="1.5" fill="#000" /></svg>);
+    case 'text':
+      return (<svg viewBox="0 0 16 16"><text x="3" y="13" fontSize="13" fontFamily="Tahoma, sans-serif" fill="#000">A</text></svg>);
+    case 'line':
+      return (<svg viewBox="0 0 16 16"><path d="M2 14 L14 2" stroke="#000" strokeWidth="1.5" /></svg>);
+    case 'curve':
+      return (<svg viewBox="0 0 16 16"><path d="M2 13 Q 8 1 14 13" fill="none" stroke="#000" strokeWidth="1.5" /></svg>);
+    case 'rect':
+      return (<svg viewBox="0 0 16 16"><rect x="2" y="4" width="12" height="9" fill="none" stroke="#000" strokeWidth="1.5" /></svg>);
+    case 'polygon':
+      return (<svg viewBox="0 0 16 16"><path d="M8 2 L14 7 L11 14 L4 13 L2 6 Z" fill="none" stroke="#000" strokeWidth="1.5" /></svg>);
+    case 'ellipse':
+      return (<svg viewBox="0 0 16 16"><ellipse cx="8" cy="8" rx="6" ry="4.5" fill="none" stroke="#000" strokeWidth="1.5" /></svg>);
+    default:
+      return null;
+  }
+}
+
+/* ---------------------------------- app ---------------------------------- */
 
 function App() {
-  const [isLightMode, setIsLightMode] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [typedText, setTypedText] = useState('');
+  const [typed, setTyped] = useState('');
   const [roleIndex, setRoleIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
-  const spotlightRef = useRef<HTMLDivElement>(null);
+  const [accent, setAccent] = useState('#0000ff');
+  const [activeTool, setActiveTool] = useState('pencil');
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [dialog, setDialog] = useState<string | null>(null);
+  const [coords, setCoords] = useState('0, 0');
+  const [now, setNow] = useState(new Date());
+  const canvasRef = useRef<HTMLDivElement>(null);
 
-  const toggleTheme = () => {
-    setIsLightMode(prev => !prev);
-    document.body.classList.toggle('light-mode');
-  };
-
-  const closeMenu = () => setMobileMenuOpen(false);
-
+  /* typewriter */
   useEffect(() => {
-    const current = roles[roleIndex];
-    const speed = isDeleting ? 30 : 60;
-    const pause = isDeleting && typedText === '' ? 300 : (!isDeleting && typedText === current ? 2000 : speed);
-
-    const timer = setTimeout(() => {
-      if (!isDeleting && typedText === current) {
+    const current = roles[roleIndex % roles.length];
+    let delay = isDeleting ? 30 : 60;
+    if (!isDeleting && typed === current) delay = 1800;
+    if (isDeleting && typed === '') delay = 400;
+    const t = setTimeout(() => {
+      if (!isDeleting && typed === current) {
         setIsDeleting(true);
-      } else if (isDeleting && typedText === '') {
+      } else if (isDeleting && typed === '') {
         setIsDeleting(false);
-        setRoleIndex((prev) => (prev + 1) % roles.length);
-      } else if (isDeleting) {
-        setTypedText(current.substring(0, typedText.length - 1));
+        setRoleIndex((i) => (i + 1) % roles.length);
       } else {
-        setTypedText(current.substring(0, typedText.length + 1));
+        setTyped(current.substring(0, typed.length + (isDeleting ? -1 : 1)));
       }
-    }, pause);
-    return () => clearTimeout(timer);
-  }, [typedText, isDeleting, roleIndex]);
+    }, delay);
+    return () => clearTimeout(t);
+  }, [typed, isDeleting, roleIndex]);
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (spotlightRef.current) {
-      spotlightRef.current.style.setProperty('--mx', `${e.clientX}px`);
-      spotlightRef.current.style.setProperty('--my', `${e.clientY}px`);
-    }
+  /* taskbar clock */
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 5000);
+    return () => clearInterval(t);
   }, []);
 
+  const activeCursor = tools.find((t) => t.id === activeTool)?.cursor || 'default';
+
+  const clockText = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+
+  const wetPaint = (name: string) =>
+    setDialog(`${name} is still wet. Check back once the paint dries.`);
+
   return (
-    <IconContext.Provider value={{ className: 'react-icon' }}>
-      <div className={`App ${isLightMode ? 'light-mode' : ''}`} onMouseMove={handleMouseMove} ref={spotlightRef}>
-        <div className="cursor-spotlight" />
-        <nav className="navbar">
-          <div className="nav-content">
-            <a href="#home" className="nav-logo">
-              <svg className="nav-logo-svg" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <linearGradient id="logoGrad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="#00d4ff" />
-                    <stop offset="100%" stopColor="#a855f7" />
-                  </linearGradient>
-                </defs>
-                <path d="M18 2 L32.5 10.5 L32.5 25.5 L18 34 L3.5 25.5 L3.5 10.5 Z" stroke="url(#logoGrad)" strokeWidth="2" fill="none" />
-                <path d="M11 23 L11 13 L18 19 L25 13 L25 23" stroke="url(#logoGrad)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-              </svg>
-            </a>
-            <button className="mobile-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
-              {mobileMenuOpen ? <FaTimes /> : <FaBars />}
-            </button>
-            <div className={`nav-links ${mobileMenuOpen ? 'open' : ''}`}>
-              <a href="#about" onClick={closeMenu}>About</a>
-              <a href="#work" onClick={closeMenu}>Work</a>
-              <a href="#skills" onClick={closeMenu}>Skills</a>
-              <a href="#projects" onClick={closeMenu}>Projects</a>
-              <a href="#contact" onClick={closeMenu}>Contact</a>
-              <button onClick={toggleTheme} className="theme-toggle" aria-label="Toggle theme">
-                {isLightMode ? <FaMoon /> : <FaSun />}
-              </button>
-            </div>
+    <div className="desktop">
+      {openMenu && <div className="menu-overlay" onClick={() => setOpenMenu(null)} />}
+
+      <div className="window raise">
+        {/* title bar */}
+        <div className="titlebar">
+          <div className="titlebar-left">
+            <svg className="titlebar-icon" viewBox="0 0 16 16" aria-hidden>
+              <rect x="1" y="6" width="9" height="8" fill="#fff" stroke="#000" />
+              <path d="M4 6 C4 2 8 1 10 1 L10 3 C8 3 6 4 6 6 Z" fill="#c0c0c0" stroke="#000" />
+              <rect x="3" y="9" width="2" height="2" fill="#0000ff" />
+              <rect x="6" y="9" width="2" height="2" fill="#ff0000" />
+              <rect x="3" y="11" width="2" height="2" fill="#ffff00" />
+              <rect x="6" y="11" width="2" height="2" fill="#00ff00" />
+            </svg>
+            <span>moaz_portfolio.bmp - Paint</span>
           </div>
-        </nav>
+          <div className="titlebar-btns">
+            <button className="tb-btn raise-btn" aria-label="Minimize" onClick={() => setDialog('Minimizing is for quitters.')}>
+              <svg viewBox="0 0 10 10"><rect x="1" y="7" width="6" height="2" fill="#000" /></svg>
+            </button>
+            <button className="tb-btn raise-btn" aria-label="Maximize" onClick={() => setDialog('Already as big as it gets.')}>
+              <svg viewBox="0 0 10 10"><rect x="1" y="1" width="8" height="8" fill="none" stroke="#000" /><rect x="1" y="1" width="8" height="2" fill="#000" /></svg>
+            </button>
+            <button className="tb-btn raise-btn" aria-label="Close" onClick={() => setDialog("You can't close me that easily.")}>
+              <svg viewBox="0 0 10 10"><path d="M1 1 L9 9 M9 1 L1 9" stroke="#000" strokeWidth="1.5" /></svg>
+            </button>
+          </div>
+        </div>
 
-        <main>
-          {/* Hero */}
-          <section id="home" className="hero">
-            <div className="hero-deco hero-deco-1" />
-            <div className="hero-deco hero-deco-2" />
-            <div className="hero-content">
-              <p className="hero-greeting">Hi, I'm</p>
-              <h1 className="hero-name">Moaz Sholook</h1>
-              <h2 className="hero-role">
-                <span className="typed-text">{typedText}</span>
-                <span className="typed-cursor">|</span>
-              </h2>
-              <div className="cta-buttons">
-                <a href={resumePDF} target="_blank" rel="noopener noreferrer" className="btn btn-gradient">
-                  <span className="btn-inner">Resume <FaArrowRight /></span>
-                </a>
-                <a href="#contact" className="btn btn-ghost">Get in Touch</a>
+        {/* menu bar */}
+        <div className="menubar">
+          <div className="menu-item-wrap">
+            <button
+              className={`menu-item ${openMenu === 'file' ? 'open' : ''}`}
+              onClick={() => setOpenMenu(openMenu === 'file' ? null : 'file')}
+            >
+              <u>F</u>ile
+            </button>
+            {openMenu === 'file' && (
+              <div className="dropdown raise">
+                <a className="dropdown-item" href={resumePDF} target="_blank" rel="noopener noreferrer">Open Resume</a>
+                <a className="dropdown-item" href="mailto:msholook@gmail.com">Send by Email</a>
+                <div className="dropdown-sep" />
+                <button className="dropdown-item" onClick={() => { setOpenMenu(null); wetPaint('Save As'); }}>Save As...</button>
               </div>
-            </div>
-            <div className="scroll-indicator">
-              <span>scroll</span>
-              <FaChevronDown className="scroll-arrow" />
-              <FaChevronDown className="scroll-arrow scroll-arrow-2" />
-            </div>
-          </section>
-
-          {/* About */}
-          <section id="about" className="section section-dark">
-            <div className="section-inner">
-              <AnimateOnScroll>
-                <h2 className="section-title section-title-center">About</h2>
-              </AnimateOnScroll>
-              <div className="about-container">
-                <AnimateOnScroll delay={100}>
-                  <div className="about-content">
-                    <p>
-                      Fourth-year Computer Science student at Carleton University specializing in Software Engineering &amp; AI/ML.
-                      I build things that ship — from billing infrastructure at scale to fraud automation to open-source developer tools.
-                    </p>
-                    <p>
-                      When I'm not coding, you'll find me on a hike, at the gym, or playing sports.
-                    </p>
-                  </div>
-                </AnimateOnScroll>
-                <AnimateOnScroll delay={250}>
-                  <div className="about-image-wrapper">
-                    <div className="about-image-ring">
-                      <img src={webPhoto} alt="Moaz Sholook" />
-                    </div>
-                  </div>
-                </AnimateOnScroll>
-              </div>
-            </div>
-          </section>
-
-          {/* Work */}
-          <section id="work" className="section section-pattern">
-            <div className="section-inner">
-              <AnimateOnScroll>
-                <h2 className="section-title section-title-center">Work</h2>
-                <p className="section-subtitle">Some of the places I've worked at.</p>
-              </AnimateOnScroll>
-              <div className="work-grid">
-                {workCards.map((card, i) => (
-                  <AnimateOnScroll key={i} delay={i * 150}>
-                    <div
-                      className="hero-card"
-                      style={{
-                        backgroundColor: card.bgColor,
-                        borderColor: card.borderColor,
-                      }}
-                    >
-                      <div className="hero-card-visual">
-                        <img
-                          src={card.logo}
-                          alt={card.company}
-                          className={`hero-card-logo ${card.invertLogo ? 'hero-card-logo-invert' : ''}`}
-                        />
-                      </div>
-                      <div className="hero-card-bottom">
-                        <div className="hero-card-info">
-                          <h3 className="hero-card-title">{card.company}</h3>
-                          <span className="hero-card-role">{card.role}</span>
-                        </div>
-                        <div className="hero-card-tags">
-                          {card.tech.map((t, j) => (
-                            <span className="hero-card-tag" key={j} style={{ borderColor: card.borderColor + '80' }}>{t}</span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </AnimateOnScroll>
+            )}
+          </div>
+          <div className="menu-item-wrap">
+            <button
+              className={`menu-item ${openMenu === 'view' ? 'open' : ''}`}
+              onClick={() => setOpenMenu(openMenu === 'view' ? null : 'view')}
+            >
+              <u>V</u>iew
+            </button>
+            {openMenu === 'view' && (
+              <div className="dropdown raise">
+                {['About', 'Work', 'Extracurriculars', 'Skills', 'Projects', 'Contact'].map((s) => (
+                  <a key={s} className="dropdown-item" href={`#${s.toLowerCase()}`} onClick={() => setOpenMenu(null)}>{s}</a>
                 ))}
               </div>
-            </div>
-          </section>
+            )}
+          </div>
+          {['Edit', 'Image', 'Colors', 'Help'].map((m) => (
+            <button key={m} className="menu-item" onClick={() => wetPaint(m)}>
+              {m}
+            </button>
+          ))}
+        </div>
 
-          {/* Extracurriculars */}
-          <section id="extracurriculars" className="section section-dark">
-            <div className="section-inner">
-              <AnimateOnScroll>
-                <h2 className="section-title section-title-center">Extracurriculars</h2>
-              </AnimateOnScroll>
-              <AnimateOnScroll delay={100}>
-                <div className="extra-card">
-                  <div className="extra-card-logo-wrap">
-                    <img src={biocareLogo} alt="Carleton BioCare" className="extra-card-logo" />
-                  </div>
-                  <div className="extra-card-info">
-                    <h3 className="extra-card-company">Carleton BioCare</h3>
-                    <span className="extra-card-role">Software Lead</span>
-                    <span className="extra-card-date">Mar 2025 – Present</span>
+        {/* body: toolbox + canvas */}
+        <div className="paint-body">
+          <div className="toolbox">
+            {tools.map((t) => (
+              <button
+                key={t.id}
+                title={t.label}
+                aria-label={t.label}
+                className={`tool ${activeTool === t.id ? 'tool-active' : 'raise-btn'}`}
+                onClick={() => setActiveTool(t.id)}
+              >
+                <ToolIcon id={t.id} />
+              </button>
+            ))}
+          </div>
+
+          <div
+            className="canvas sunken"
+            ref={canvasRef}
+            style={{ cursor: activeCursor }}
+            onMouseMove={(e) => {
+              const r = canvasRef.current?.getBoundingClientRect();
+              if (r) setCoords(`${Math.round(e.clientX - r.left)}, ${Math.round(e.clientY - r.top)}`);
+            }}
+          >
+            {/* hero */}
+            <section className="hero">
+              <svg className="doodle-sun" viewBox="0 0 60 60" aria-hidden>
+                <circle cx="30" cy="30" r="12" fill="#ffff00" stroke="#000" strokeWidth="1.5" />
+                {[0, 45, 90, 135, 180, 225, 270, 315].map((a) => (
+                  <line key={a} x1="30" y1="10" x2="30" y2="16" stroke="#000" strokeWidth="1.5" transform={`rotate(${a} 30 30)`} />
+                ))}
+              </svg>
+              <div className="paint-textbox">
+                <span className="handle tl" /><span className="handle tr" /><span className="handle bl" /><span className="handle br" />
+                <p className="hero-hi">Hi, I'm</p>
+                <h1 className="hero-name">Moaz Sholook</h1>
+                <svg className="squiggle" viewBox="0 0 200 10" preserveAspectRatio="none" aria-hidden>
+                  <path d="M2 6 Q 10 2, 18 6 T 34 6 T 50 6 T 66 6 T 82 6 T 98 6 T 114 6 T 130 6 T 146 6 T 162 6 T 178 6 T 194 6" stroke={accent} fill="none" strokeWidth="2.5" />
+                </svg>
+                <p className="hero-role">
+                  {typed}
+                  <span className="block-cursor" />
+                </p>
+              </div>
+              <div className="hero-btns">
+                <a className="btn95 raise-btn" href={resumePDF} target="_blank" rel="noopener noreferrer">Open Resume</a>
+                <a className="btn95 raise-btn" href="https://github.com/moazsholook" target="_blank" rel="noopener noreferrer">GitHub</a>
+                <a className="btn95 raise-btn" href="https://www.linkedin.com/in/moazsholook/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                <a className="btn95 raise-btn" href="mailto:msholook@gmail.com">Email</a>
+              </div>
+            </section>
+
+            {/* about */}
+            <section className="section" id="about">
+              <h2 className="section-title">About</h2>
+              <div className="about-grid">
+                <div className="photo-frame">
+                  <div className="paint-textbox photo-select">
+                    <span className="handle tl" /><span className="handle tr" /><span className="handle bl" /><span className="handle br" />
+                    <img src={webPhoto} alt="Moaz Sholook" />
                   </div>
                 </div>
-              </AnimateOnScroll>
-            </div>
-          </section>
+                <div className="about-text">
+                  <p>
+                    Fourth-year Computer Science student at Carleton University specializing in
+                    Software Engineering &amp; AI/ML. I build things that ship — from billing
+                    infrastructure at scale to fraud automation to open-source developer tools.
+                  </p>
+                  <p>
+                    This winter I'm joining <strong>Terminal (YC S23)</strong> in Toronto as a
+                    Software Engineering Intern on the backend team.
+                  </p>
+                  <p>
+                    When I'm not coding, you'll find me on a hike, at the gym, or playing sports.
+                  </p>
+                </div>
+              </div>
+            </section>
 
-          {/* Skills */}
-          <section id="skills" className="section section-pattern" style={{ position: 'relative', overflow: 'hidden' }}>
-            <div className="orbit-animation orbit-section">
-              <div className="orbit-tilt orbit-tilt-1">
-                <div className="orbit"><div className="orbit-dot" /></div>
+            {/* work */}
+            <section className="section" id="work">
+              <h2 className="section-title">Work</h2>
+              <p className="section-sub">Some of the places I've worked at.</p>
+              <div className="card-list">
+                {workCards.map((w) => (
+                  <a key={w.company} className="card raise work-card" href={w.link} target="_blank" rel="noopener noreferrer">
+                    <div className="logo-tile sunken">
+                      <img src={w.logo} alt={`${w.company} logo`} />
+                    </div>
+                    <div className="card-body">
+                      <div className="card-head">
+                        <h3>{w.company}</h3>
+                        {w.incoming && <span className="badge badge-incoming">Incoming</span>}
+                      </div>
+                      {w.sub && <p className="card-sub">{w.sub}</p>}
+                      <p className="card-role">{w.role}</p>
+                      {w.dates && <p className="card-dates">{w.dates}</p>}
+                      <div className="chips">
+                        {w.tech.map((t) => <span key={t} className="chip">{t}</span>)}
+                      </div>
+                    </div>
+                  </a>
+                ))}
               </div>
-              <div className="orbit-tilt orbit-tilt-2">
-                <div className="orbit orbit-reverse"><div className="orbit-dot orbit-dot-accent" /></div>
+            </section>
+
+            {/* extracurriculars */}
+            <section className="section" id="extracurriculars">
+              <h2 className="section-title">Extracurriculars</h2>
+              <div className="card-list">
+                <div className="card raise work-card">
+                  <div className="logo-tile sunken">
+                    <img src={biocareLogo} alt="Carleton BioCARE logo" />
+                  </div>
+                  <div className="card-body">
+                    <div className="card-head"><h3>Carleton BioCARE</h3></div>
+                    <p className="card-role">Software Lead</p>
+                    <p className="card-dates">Mar 2025 – Present</p>
+                  </div>
+                </div>
               </div>
-              <div className="orbit-tilt orbit-tilt-3">
-                <div className="orbit orbit-slow"><div className="orbit-dot" /></div>
-              </div>
-              <div className="orbit-center" />
-            </div>
-            <div className="section-inner">
-              <AnimateOnScroll>
-                <h2 className="section-title section-title-center">Skills</h2>
-              </AnimateOnScroll>
+            </section>
+
+            {/* skills */}
+            <section className="section" id="skills">
+              <h2 className="section-title">Skills</h2>
               <div className="skills-grid">
-                {skillCategories.map((cat, i) => (
-                  <AnimateOnScroll key={i} delay={i * 80}>
-                    <div className="skill-group">
-                      <h3 className="skill-group-title">{cat.name}</h3>
-                      <div className="skill-pills">
-                        {cat.items.map((item, j) => (
-                          <span className="skill-pill" key={j}>{item}</span>
+                {skillCategories.map((c) => (
+                  <div key={c.name} className="skill-group raise">
+                    <h3>{c.name}</h3>
+                    <div className="chips">
+                      {c.items.map((i) => <span key={i} className="chip">{i}</span>)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* projects */}
+            <section className="section" id="projects">
+              <h2 className="section-title">Projects</h2>
+              <p className="section-sub">Some of the projects I've worked on.</p>
+              <div className="card-list">
+                {projects.map((p) => (
+                  <div key={p.name} className="card raise project-card">
+                    {p.image && (
+                      <div className="project-img sunken">
+                        <img src={p.image} alt={`${p.name} screenshot`} />
+                      </div>
+                    )}
+                    <div className="card-body">
+                      <div className="card-head">
+                        <h3>{p.name}</h3>
+                        <span className="badge">{p.badge}</span>
+                      </div>
+                      <p className="card-desc">{p.description}</p>
+                      <div className="chips">
+                        {p.tech.map((t) => <span key={t} className="chip">{t}</span>)}
+                      </div>
+                      <div className="card-links">
+                        {p.links.map((l) => (
+                          <a key={l.label} className="btn95 btn95-sm raise-btn" href={l.url} target="_blank" rel="noopener noreferrer">{l.label}</a>
                         ))}
                       </div>
                     </div>
-                  </AnimateOnScroll>
+                  </div>
                 ))}
               </div>
-            </div>
-          </section>
+            </section>
 
-          {/* Projects */}
-          <section id="projects" className="section section-dark">
-            <div className="section-inner">
-              <AnimateOnScroll>
-                <h2 className="section-title section-title-center">Projects</h2>
-                <p className="section-subtitle">Some of the projects I've worked on.</p>
-              </AnimateOnScroll>
-              <div className="projects-grid">
-                {projects.map((proj, i) => (
-                  <AnimateOnScroll key={i} delay={i * 150}>
-                    <div
-                      className="hero-card"
-                      style={{
-                        borderColor: proj.borderColor,
-                        backgroundColor: proj.image ? '#111' : 'var(--bg-2)',
-                      }}
-                    >
-                      <div
-                        className="hero-card-visual hero-card-visual-img"
-                        style={proj.image ? {
-                          backgroundImage: `url(${proj.image})`,
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center top',
-                        } : undefined}
-                      >
-                        {!proj.image && (
-                          <div className="hero-card-badge-center">
-                            {proj.badgeIcon}
-                            <span>{proj.badge}</span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="hero-card-bottom">
-                        <div className="hero-card-info">
-                          <h3 className="hero-card-title">{proj.name}</h3>
-                          <span className="hero-card-role">{proj.description}</span>
-                        </div>
-                        <div className="hero-card-bottom-row">
-                          <div className="hero-card-tags">
-                            {proj.tech.map((t, j) => (
-                              <span className="hero-card-tag" key={j} style={{ borderColor: proj.borderColor + '80' }}>{t}</span>
-                            ))}
-                          </div>
-                          <div className="hero-card-links">
-                            <a href={proj.github} target="_blank" rel="noopener noreferrer" className="hero-card-link">
-                              <FaGithub />
-                            </a>
-                            {proj.demo && (
-                              <a href={proj.demo} target="_blank" rel="noopener noreferrer" className="hero-card-link">
-                                <FaExternalLinkAlt />
-                              </a>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </AnimateOnScroll>
-                ))}
+            {/* contact */}
+            <section className="section" id="contact">
+              <h2 className="section-title">Get in Touch</h2>
+              <p className="section-sub">Always open to discussing new projects and opportunities.</p>
+              <div className="hero-btns">
+                <a className="btn95 raise-btn" href="mailto:msholook@gmail.com">msholook@gmail.com</a>
+                <a className="btn95 raise-btn" href="https://www.linkedin.com/in/moazsholook/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                <a className="btn95 raise-btn" href="https://github.com/moazsholook" target="_blank" rel="noopener noreferrer">GitHub</a>
+              </div>
+            </section>
+
+            <p className="footer-line">Made with ♥ by Moaz Sholook</p>
+          </div>
+        </div>
+
+        {/* color palette */}
+        <div className="palette-row">
+          <div className="current-color raise">
+            <div className="cc-front" style={{ background: accent }} />
+            <div className="cc-back" />
+          </div>
+          <div className="palette sunken">
+            {palette.map((c) => (
+              <button
+                key={c}
+                className={`swatch ${accent === c ? 'swatch-active' : ''}`}
+                style={{ background: c }}
+                aria-label={`Color ${c}`}
+                onClick={() => setAccent(c)}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* status bar */}
+        <div className="statusbar">
+          <span className="status-cell status-wide">For Help, click Help Topics on the Help Menu.</span>
+          <span className="status-cell">{coords}px</span>
+          <span className="status-cell">{accent.toUpperCase()}</span>
+        </div>
+      </div>
+
+      {/* taskbar */}
+      <div className="taskbar">
+        <button className="start-btn raise-btn" onClick={() => setDialog('Where would you like to go today?')}>
+          <span className="start-logo" aria-hidden>
+            <i className="p1" /><i className="p2" /><i className="p3" /><i className="p4" />
+          </span>
+          <strong>Start</strong>
+        </button>
+        <div className="task-btn sunken-btn">
+          <svg viewBox="0 0 16 16" aria-hidden>
+            <rect x="1" y="6" width="9" height="8" fill="#fff" stroke="#000" />
+            <path d="M4 6 C4 2 8 1 10 1 L10 3 C8 3 6 4 6 6 Z" fill="#c0c0c0" stroke="#000" />
+          </svg>
+          <span>moaz_portfolio.bmp - Paint</span>
+        </div>
+        <div className="taskbar-spacer" />
+        <div className="tray sunken">{clockText}</div>
+      </div>
+
+      {/* dialog */}
+      {dialog && (
+        <div className="dialog-overlay" onClick={() => setDialog(null)}>
+          <div className="dialog raise" onClick={(e) => e.stopPropagation()} role="alertdialog" aria-label="Paint">
+            <div className="titlebar">
+              <div className="titlebar-left"><span>Paint</span></div>
+              <div className="titlebar-btns">
+                <button className="tb-btn raise-btn" aria-label="Close dialog" onClick={() => setDialog(null)}>
+                  <svg viewBox="0 0 10 10"><path d="M1 1 L9 9 M9 1 L1 9" stroke="#000" strokeWidth="1.5" /></svg>
+                </button>
               </div>
             </div>
-          </section>
-
-          {/* Contact */}
-          <section id="contact" className="section section-dark">
-            <div className="section-inner">
-              <AnimateOnScroll>
-                <h2 className="section-title section-title-center">Get in Touch</h2>
-                <p className="section-subtitle">Always open to discussing new projects and opportunities.</p>
-                <div className="contact-links">
-                  <a href="mailto:sholookmoaz@gmail.com" className="contact-link" aria-label="Email">
-                    <FaEnvelope />
-                  </a>
-                  <a href="https://linkedin.com/in/moazsholook" target="_blank" rel="noopener noreferrer" className="contact-link" aria-label="LinkedIn">
-                    <FaLinkedin />
-                  </a>
-                  <a href="https://github.com/moazsholook" target="_blank" rel="noopener noreferrer" className="contact-link" aria-label="GitHub">
-                    <FaGithub />
-                  </a>
-                </div>
-              </AnimateOnScroll>
+            <div className="dialog-body">
+              <svg className="dialog-icon" viewBox="0 0 32 32" aria-hidden>
+                <rect x="4" y="8" width="24" height="20" fill="#ffff00" stroke="#000" />
+                <rect x="14" y="13" width="3" height="8" fill="#000" />
+                <rect x="14" y="23" width="3" height="3" fill="#000" />
+              </svg>
+              <p>{dialog}</p>
             </div>
-          </section>
-        </main>
-
-        <footer className="footer">
-          <div className="footer-inner">
-            <p>Made with <span className="footer-heart">&hearts;</span> by Moaz Sholook</p>
-            <div className="footer-links">
-              <a href="https://linkedin.com/in/moazsholook" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><FaLinkedin /></a>
-              <a href="https://github.com/moazsholook" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><FaGithub /></a>
-              <a href="mailto:sholookmoaz@gmail.com" aria-label="Email"><FaEnvelope /></a>
+            <div className="dialog-btns">
+              <button className="btn95 raise-btn" onClick={() => setDialog(null)} autoFocus>OK</button>
             </div>
           </div>
-        </footer>
-      </div>
-    </IconContext.Provider>
+        </div>
+      )}
+    </div>
   );
 }
 
