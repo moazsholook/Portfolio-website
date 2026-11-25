@@ -856,3 +856,70 @@
 .start-items .dropdown-item {
   padding: 8px 18px;
 }
+
+/* erasable photo */
+.photo-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid #000;
+  background: #fff;
+}
+
+/* dark mode */
+.desktop.dark {
+  background: #062626;
+  color: #ececec;
+}
+.dark .canvas {
+  background: #1f1f1f;
+  color: #ececec;
+}
+.dark .paint-textbox {
+  background: #2b2b2b;
+  border-color: #cfcfcf;
+}
+.dark .handle {
+  background: #2b2b2b;
+  border-color: #cfcfcf;
+}
+.dark .hint-line {
+  color: #9db9ff;
+}
+.dark .block-cursor {
+  background: #ececec;
+}
+.dark .draw-layer {
+  mix-blend-mode: screen;
+}
+.dark .doodle-sun circle,
+.dark .doodle-sun line {
+  stroke: #ececec;
+}
+.dark .squiggle path {
+  stroke-width: 3;
+}
+/* keep the win95 chrome (gray panels) readable */
+.dark .menubar,
+.dark .dropdown,
+.dark .statusbar,
+.dark .palette-row,
+.dark .taskbar,
+.dark .start-menu,
+.dark .dialog,
+.dark .card,
+.dark .skill-group,
+.dark .toolbox {
+  color: #000;
+}
+.dark .section-title {
+  background: #2b2b2b;
+  border-color: #cfcfcf;
+  color: #ececec;
+}
+.dark .section-sub {
+  color: #cfcfcf;
+}
+.dark .footer-line {
+  color: #aaa;
+}

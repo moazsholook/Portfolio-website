@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './App.css';
 import webPhoto from './OSAH2023-original.2f4567c88a1f1cdeeac8.jpeg';
-import resumePDF from './Moaz_Sholook_SWE_Fall_2026_Resume.pdf';
+import resumePDF from './Moaz_Sholook_Resume.pdf';
 import shopifyLogo from './shopify-logo.png';
 import isedLogo from './ISED_Canada_Logo.jpg';
 import biocareLogo from './logos/biocare-logo-full.png';
@@ -106,6 +106,7 @@ const projects: Project[] = [
     tech: ['TypeScript', 'Next.js', 'COBOL port'],
     image: batchhatchImg,
     links: [
+      { label: 'Live Demo', url: 'https://batchhatch.work' },
       { label: 'GitHub', url: 'https://github.com/omarismail-cs/BatchHatch' },
       { label: 'Devpost', url: 'https://devpost.com/software/batchhatch' },
     ],
@@ -213,8 +214,14 @@ type DrawHandle = { clear: () => void; save: () => void };
 
 const DrawLayer = React.forwardRef<
   DrawHandle,
-  { tool: string; color: string; onPick: (c: string) => void; onText: () => string | null }
->(function DrawLayer({ tool, color, onPick, onText }, ref) {
+  {
+    tool: string;
+    color: string;
+    onPick: (c: string) => void;
+    onText: () => string | null;
+    onErase?: (a: { x: number; y: number }, b: { x: number; y: number }, fromRect: DOMRect, width: number) => void;
+  }
+>(function DrawLayer({ tool, color, onPick, onText, onErase }, ref) {
   const cvs = useRef<HTMLCanvasElement>(null);
   const snap = useRef<ImageData | null>(null);
   const start = useRef<{ x: number; y: number } | null>(null);
@@ -314,6 +321,9 @@ const DrawLayer = React.forwardRef<
     ctx.lineTo(b.x, b.y);
     ctx.stroke();
     ctx.globalCompositeOperation = 'source-over';
+    if (tool === 'eraser' && onErase && cvs.current) {
+      onErase(a, b, cvs.current.getBoundingClientRect(), 16);
+    }
   };
 
   const spray = (pt: { x: number; y: number }) => {
@@ -405,6 +415,65 @@ const DrawLayer = React.forwardRef<
   );
 });
 
+/* ------------------------------ erasable photo ------------------------------ */
+
+type ErasablePhotoHandle = {
+  erase: (a: { x: number; y: number }, b: { x: number; y: number }, fromRect: DOMRect, width: number) => void;
+  restore: () => void;
+};
+
+const ErasablePhoto = React.forwardRef<ErasablePhotoHandle, { src: string; alt: string }>(
+  function ErasablePhoto({ src, alt }, ref) {
+    const cvs = useRef<HTMLCanvasElement>(null);
+    const imgRef = useRef<HTMLImageElement | null>(null);
+
+    const redraw = () => {
+      const c = cvs.current;
+      const img = imgRef.current;
+      if (!c || !img || !img.naturalWidth) return;
+      c.width = img.naturalWidth;
+      c.height = img.naturalHeight;
+      const ctx = c.getContext('2d')!;
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.clearRect(0, 0, c.width, c.height);
+      ctx.drawImage(img, 0, 0);
+    };
+
+    React.useImperativeHandle(ref, () => ({
+      erase: (a, b, fromRect, width) => {
+        const c = cvs.current;
+        if (!c || !c.width) return;
+        const r = c.getBoundingClientRect();
+        if (!r.width) return;
+        const s = c.width / r.width;
+        const ctx = c.getContext('2d')!;
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = width * s;
+        ctx.beginPath();
+        ctx.moveTo((a.x + fromRect.left - r.left) * s, (a.y + fromRect.top - r.top) * s);
+        ctx.lineTo((b.x + fromRect.left - r.left) * s, (b.y + fromRect.top - r.top) * s);
+        ctx.stroke();
+        ctx.globalCompositeOperation = 'source-over';
+      },
+      restore: redraw,
+    }));
+
+    return (
+      <>
+        <img
+          src={src}
+          alt={alt}
+          style={{ display: 'none' }}
+          onLoad={(e) => { imgRef.current = e.currentTarget; redraw(); }}
+        />
+        <canvas ref={cvs} className="photo-canvas" role="img" aria-label={alt} />
+      </>
+    );
+  }
+);
+
 /* ---------------------------------- app ---------------------------------- */
 
 function App() {
@@ -419,6 +488,8 @@ function App() {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [dialog, setDialog] = useState<string | null>(null);
   const [coords, setCoords] = useState('0, 0');
+  const [dark, setDark] = useState(false);
+  const photoRef = useRef<ErasablePhotoHandle>(null);
   const [now, setNow] = useState(new Date());
   const canvasRef = useRef<HTMLDivElement>(null);
 
@@ -456,7 +527,7 @@ function App() {
     pencil: 'Pencil: drag anywhere on the page to draw.',
     brush: 'Brush: drag to paint thick strokes.',
     airbrush: 'Airbrush: hold and drag to spray paint.',
-    eraser: 'Eraser: rubs out your doodles, not my content.',
+    eraser: 'Eraser: rubs out doodles, and even my photo. Edit > Clear Image brings it back.',
     fill: 'Fill With Color: click inside a closed shape you drew.',
     pick: 'Pick Color: click a doodle to grab its color.',
     line: 'Line: drag to draw a straight line.',
@@ -477,7 +548,7 @@ function App() {
     setDialog(`${name} is still wet. Check back once the paint dries.`);
 
   return (
-    <div className="desktop">
+    <div className={dark ? 'desktop dark' : 'desktop'}>
       {openMenu && <div className="menu-overlay" onClick={() => setOpenMenu(null)} />}
 
       <div className="window raise">
@@ -537,6 +608,10 @@ function App() {
                 {['About', 'Work', 'Extracurriculars', 'Skills', 'Projects', 'Contact'].map((s) => (
                   <a key={s} className="dropdown-item" href={`#${s.toLowerCase()}`} onClick={() => setOpenMenu(null)}>{s}</a>
                 ))}
+                <div className="dropdown-sep" />
+                <button className="dropdown-item" onClick={() => { setDark((d) => !d); setOpenMenu(null); }}>
+                  {dark ? '✓ Dark Mode' : 'Dark Mode'}
+                </button>
               </div>
             )}
           </div>
@@ -546,7 +621,7 @@ function App() {
             </button>
             {openMenu === 'edit' && (
               <div className="dropdown raise">
-                <button className="dropdown-item" onClick={() => { setOpenMenu(null); drawRef.current?.clear(); }}>Clear Image</button>
+                <button className="dropdown-item" onClick={() => { setOpenMenu(null); drawRef.current?.clear(); photoRef.current?.restore(); }}>Clear Image</button>
               </div>
             )}
           </div>
@@ -599,6 +674,7 @@ function App() {
               color={accent}
               onPick={setAccent}
               onText={() => window.prompt('Text to paint:')}
+              onErase={(a, b, rect, w) => photoRef.current?.erase(a, b, rect, w)}
             />
             {/* hero */}
             <section className="hero">
@@ -636,7 +712,7 @@ function App() {
                 <div className="photo-frame">
                   <div className="paint-textbox photo-select">
                     <span className="handle tl" /><span className="handle tr" /><span className="handle bl" /><span className="handle br" />
-                    <img src={webPhoto} alt="Moaz Sholook" />
+                    <ErasablePhoto ref={photoRef} src={webPhoto} alt="Moaz Sholook" />
                   </div>
                 </div>
                 <div className="about-text">
@@ -803,7 +879,7 @@ function App() {
                 <div className="dropdown-sep" />
                 <a className="dropdown-item" href="https://wchews.onrender.com" target="_blank" rel="noopener noreferrer" onClick={() => setStartOpen(false)}>Run Wchews...</a>
                 <a className="dropdown-item" href={resumePDF} target="_blank" rel="noopener noreferrer" onClick={() => setStartOpen(false)}>Open Resume</a>
-                <button className="dropdown-item" onClick={() => { setStartOpen(false); drawRef.current?.clear(); }}>Clear Doodles</button>
+                <button className="dropdown-item" onClick={() => { setStartOpen(false); drawRef.current?.clear(); photoRef.current?.restore(); }}>Clear Doodles</button>
               </div>
             </div>
           </>
