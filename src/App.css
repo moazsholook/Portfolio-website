@@ -240,6 +240,7 @@
 
 /* canvas */
 .canvas {
+  position: relative;
   flex: 1;
   padding: 28px 32px 20px;
   overflow: hidden;
@@ -792,4 +793,66 @@
   .statusbar .status-cell:nth-child(2) {
     display: none;
   }
+}
+
+/* interactivity */
+.draw-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 5;
+  pointer-events: none;
+  touch-action: auto;
+  mix-blend-mode: multiply;
+}
+.draw-layer.draw-active {
+  pointer-events: auto;
+  touch-action: none;
+}
+.hint-line {
+  margin: 14px 0 0;
+  font-size: 12px;
+  color: #000080;
+}
+.work-card, .project-card, .skill-group {
+  transition: transform 0.12s steps(3);
+}
+.work-card:hover, .project-card:hover {
+  transform: translate(-2px, -2px);
+}
+.chip:hover {
+  background: #000080;
+  color: #fff;
+}
+.start-menu {
+  position: fixed;
+  left: 4px;
+  bottom: 34px;
+  z-index: 60;
+  display: flex;
+  min-width: 210px;
+}
+.start-side {
+  width: 26px;
+  background: linear-gradient(0deg, #000080, #1084d0);
+  position: relative;
+}
+.start-side span {
+  position: absolute;
+  left: 4px;
+  bottom: 8px;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  color: #fff;
+  font-weight: bold;
+  font-size: 16px;
+}
+.start-items {
+  flex: 1;
+  padding: 3px;
+  display: flex;
+  flex-direction: column;
+}
+.start-items .dropdown-item {
+  padding: 8px 18px;
 }

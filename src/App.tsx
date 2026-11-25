@@ -78,7 +78,10 @@ const projects: Project[] = [
     description:
       'Scan a meal and get a 0–100 score with a verdict from CERTIFIED L NIBBLES to ABSOLUTE CINEMA. No ML — every stat is a hand-built OpenCV measurement, served with a roast, a meme and Discord sharing.',
     tech: ['Python', 'Flask', 'OpenCV', 'NumPy'],
-    links: [{ label: 'Devpost', url: 'https://devpost.com/software/wchews' }],
+    links: [
+      { label: 'Live Demo', url: 'https://wchews.onrender.com' },
+      { label: 'Devpost', url: 'https://devpost.com/software/wchews' },
+    ],
   },
   {
     name: 'Jinge',
@@ -200,6 +203,205 @@ function ToolIcon({ id }: { id: string }) {
   }
 }
 
+
+/* ------------------------------ drawing layer ------------------------------ */
+
+type DrawHandle = { clear: () => void; save: () => void };
+
+const DrawLayer = React.forwardRef<
+  DrawHandle,
+  { tool: string; color: string; onPick: (c: string) => void; onText: () => string | null }
+>(function DrawLayer({ tool, color, onPick, onText }, ref) {
+  const cvs = useRef<HTMLCanvasElement>(null);
+  const snap = useRef<ImageData | null>(null);
+  const start = useRef<{ x: number; y: number } | null>(null);
+  const last = useRef<{ x: number; y: number } | null>(null);
+  const air = useRef<number | null>(null);
+  const active = ['pencil', 'brush', 'airbrush', 'eraser', 'line', 'rect', 'ellipse', 'fill', 'pick', 'text'].includes(tool);
+
+  React.useImperativeHandle(ref, () => ({
+    clear: () => {
+      const c = cvs.current;
+      c?.getContext('2d')?.clearRect(0, 0, c.width, c.height);
+    },
+    save: () => {
+      const c = cvs.current;
+      if (!c) return;
+      const out = document.createElement('canvas');
+      out.width = c.width;
+      out.height = c.height;
+      const o = out.getContext('2d')!;
+      o.fillStyle = '#fff';
+      o.fillRect(0, 0, out.width, out.height);
+      o.drawImage(c, 0, 0);
+      const a = document.createElement('a');
+      a.download = 'moaz_portfolio_doodle.png';
+      a.href = out.toDataURL('image/png');
+      a.click();
+    },
+  }));
+
+  /* keep the bitmap sized to the page */
+  useEffect(() => {
+    const c = cvs.current;
+    const parent = c?.parentElement;
+    if (!c || !parent) return;
+    const fit = () => {
+      const w = parent.clientWidth;
+      const h = parent.scrollHeight;
+      if (c.width === w && c.height === h) return;
+      const old = document.createElement('canvas');
+      old.width = c.width;
+      old.height = c.height;
+      if (c.width && c.height) old.getContext('2d')!.drawImage(c, 0, 0);
+      c.width = w;
+      c.height = h;
+      c.getContext('2d')!.drawImage(old, 0, 0);
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(parent);
+    const iv = setInterval(fit, 1500);
+    return () => { ro.disconnect(); clearInterval(iv); };
+  }, []);
+
+  const pos = (e: React.PointerEvent) => {
+    const r = cvs.current!.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  };
+
+  const floodFill = (x0: number, y0: number) => {
+    const c = cvs.current!;
+    const ctx = c.getContext('2d')!;
+    const img = ctx.getImageData(0, 0, c.width, c.height);
+    const d = img.data;
+    const x = Math.floor(x0), y = Math.floor(y0);
+    const idx = (y * c.width + x) * 4;
+    const t = [d[idx], d[idx + 1], d[idx + 2], d[idx + 3]];
+    const n = parseInt(color.slice(1), 16);
+    const f = [(n >> 16) & 255, (n >> 8) & 255, n & 255, 255];
+    if (t.every((v, i) => v === f[i])) return;
+    const same = (i: number) => d[i] === t[0] && d[i + 1] === t[1] && d[i + 2] === t[2] && d[i + 3] === t[3];
+    const stack = [x, y];
+    let count = 0;
+    while (stack.length && count < c.width * c.height * 0.3) {
+      const cy = stack.pop()!, cx = stack.pop()!;
+      if (cx < 0 || cy < 0 || cx >= c.width || cy >= c.height) continue;
+      const i = (cy * c.width + cx) * 4;
+      if (!same(i)) continue;
+      d[i] = f[0]; d[i + 1] = f[1]; d[i + 2] = f[2]; d[i + 3] = 255;
+      count++;
+      stack.push(cx + 1, cy, cx - 1, cy, cx, cy + 1, cx, cy - 1);
+    }
+    if (count < c.width * c.height * 0.3) ctx.putImageData(img, 0, 0);
+  };
+
+  const stroke = (ctx: CanvasRenderingContext2D, a: { x: number; y: number }, b: { x: number; y: number }) => {
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = color;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.lineWidth = tool === 'brush' ? 8 : 2;
+    if (tool === 'eraser') {
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.lineWidth = 16;
+    }
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+    ctx.stroke();
+    ctx.globalCompositeOperation = 'source-over';
+  };
+
+  const spray = (pt: { x: number; y: number }) => {
+    const ctx = cvs.current!.getContext('2d')!;
+    ctx.fillStyle = color;
+    for (let i = 0; i < 14; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const r = Math.random() * 12;
+      ctx.fillRect(pt.x + Math.cos(a) * r, pt.y + Math.sin(a) * r, 1.5, 1.5);
+    }
+  };
+
+  const down = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const c = cvs.current!;
+    const ctx = c.getContext('2d')!;
+    const pt = pos(e);
+    if (tool === 'pick') {
+      const px = ctx.getImageData(Math.floor(pt.x), Math.floor(pt.y), 1, 1).data;
+      if (px[3] > 0) {
+        onPick('#' + [px[0], px[1], px[2]].map((v) => v.toString(16).padStart(2, '0')).join(''));
+      }
+      return;
+    }
+    if (tool === 'fill') { floodFill(pt.x, pt.y); return; }
+    if (tool === 'text') {
+      const t = onText();
+      if (t) {
+        ctx.fillStyle = color;
+        ctx.font = 'bold 22px "Comic Sans MS", Tahoma, sans-serif';
+        ctx.fillText(t, pt.x, pt.y);
+      }
+      return;
+    }
+    c.setPointerCapture(e.pointerId);
+    start.current = pt;
+    last.current = pt;
+    snap.current = ctx.getImageData(0, 0, c.width, c.height);
+    if (tool === 'airbrush') {
+      spray(pt);
+      air.current = window.setInterval(() => last.current && spray(last.current), 30);
+    } else if (tool === 'pencil' || tool === 'brush' || tool === 'eraser') {
+      stroke(ctx, pt, { x: pt.x + 0.1, y: pt.y + 0.1 });
+    }
+  };
+
+  const move = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (!start.current) return;
+    const c = cvs.current!;
+    const ctx = c.getContext('2d')!;
+    const pt = pos(e);
+    if (tool === 'pencil' || tool === 'brush' || tool === 'eraser') {
+      stroke(ctx, last.current!, pt);
+    } else if (tool === 'airbrush') {
+      spray(pt);
+    } else if (snap.current) {
+      ctx.putImageData(snap.current, 0, 0);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      const s0 = start.current;
+      ctx.beginPath();
+      if (tool === 'line') {
+        ctx.moveTo(s0.x, s0.y);
+        ctx.lineTo(pt.x, pt.y);
+      } else if (tool === 'rect') {
+        ctx.rect(s0.x, s0.y, pt.x - s0.x, pt.y - s0.y);
+      } else if (tool === 'ellipse') {
+        ctx.ellipse((s0.x + pt.x) / 2, (s0.y + pt.y) / 2, Math.abs(pt.x - s0.x) / 2, Math.abs(pt.y - s0.y) / 2, 0, 0, Math.PI * 2);
+      }
+      ctx.stroke();
+    }
+    last.current = pt;
+  };
+
+  const up = () => {
+    start.current = null;
+    snap.current = null;
+    if (air.current) { clearInterval(air.current); air.current = null; }
+  };
+
+  return (
+    <canvas
+      ref={cvs}
+      className={`draw-layer ${active ? 'draw-active' : ''}`}
+      onPointerDown={down}
+      onPointerMove={move}
+      onPointerUp={up}
+      onPointerCancel={up}
+    />
+  );
+});
+
 /* ---------------------------------- app ---------------------------------- */
 
 function App() {
@@ -207,7 +409,10 @@ function App() {
   const [roleIndex, setRoleIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
   const [accent, setAccent] = useState('#0000ff');
-  const [activeTool, setActiveTool] = useState('pencil');
+  const [activeTool, setActiveTool] = useState('select');
+  const [zoomed, setZoomed] = useState(false);
+  const [startOpen, setStartOpen] = useState(false);
+  const drawRef = useRef<DrawHandle>(null);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [dialog, setDialog] = useState<string | null>(null);
   const [coords, setCoords] = useState('0, 0');
@@ -242,6 +447,28 @@ function App() {
   const activeCursor = tools.find((t) => t.id === activeTool)?.cursor || 'default';
 
   const clockText = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+
+  const toolHints: Record<string, string> = {
+    select: 'Select: click links as normal. Pick a drawing tool to doodle on this page.',
+    pencil: 'Pencil: drag anywhere on the page to draw.',
+    brush: 'Brush: drag to paint thick strokes.',
+    airbrush: 'Airbrush: hold and drag to spray paint.',
+    eraser: 'Eraser: rubs out your doodles, not my content.',
+    fill: 'Fill With Color: click inside a closed shape you drew.',
+    pick: 'Pick Color: click a doodle to grab its color.',
+    line: 'Line: drag to draw a straight line.',
+    rect: 'Rectangle: drag to draw a box.',
+    ellipse: 'Ellipse: drag to draw an oval.',
+    text: 'Text: click to place a message.',
+    zoom: 'Magnifier: click to zoom the page in and out.',
+    curve: 'Curve: still wet. Try the pencil.',
+    polygon: 'Polygon: still wet. Try the pencil.',
+  };
+
+  const pickTool = (id: string) => {
+    if (id === 'zoom') { setZoomed((z) => !z); setActiveTool('select'); return; }
+    setActiveTool(id);
+  };
 
   const wetPaint = (name: string) =>
     setDialog(`${name} is still wet. Check back once the paint dries.`);
@@ -291,7 +518,7 @@ function App() {
                 <a className="dropdown-item" href={resumePDF} target="_blank" rel="noopener noreferrer">Open Resume</a>
                 <a className="dropdown-item" href="mailto:msholook@gmail.com">Send by Email</a>
                 <div className="dropdown-sep" />
-                <button className="dropdown-item" onClick={() => { setOpenMenu(null); wetPaint('Save As'); }}>Save As...</button>
+                <button className="dropdown-item" onClick={() => { setOpenMenu(null); drawRef.current?.save(); }}>Save My Doodle...</button>
               </div>
             )}
           </div>
@@ -310,7 +537,28 @@ function App() {
               </div>
             )}
           </div>
-          {['Edit', 'Image', 'Colors', 'Help'].map((m) => (
+          <div className="menu-item-wrap">
+            <button className={`menu-item ${openMenu === 'edit' ? 'open' : ''}`} onClick={() => setOpenMenu(openMenu === 'edit' ? null : 'edit')}>
+              <u>E</u>dit
+            </button>
+            {openMenu === 'edit' && (
+              <div className="dropdown raise">
+                <button className="dropdown-item" onClick={() => { setOpenMenu(null); drawRef.current?.clear(); }}>Clear Image</button>
+              </div>
+            )}
+          </div>
+          <div className="menu-item-wrap">
+            <button className={`menu-item ${openMenu === 'help' ? 'open' : ''}`} onClick={() => setOpenMenu(openMenu === 'help' ? null : 'help')}>
+              <u>H</u>elp
+            </button>
+            {openMenu === 'help' && (
+              <div className="dropdown raise">
+                <button className="dropdown-item" onClick={() => { setOpenMenu(null); setDialog('This page is a real canvas. Pick a tool on the left, a color on the bottom, and draw on it. Edit > Clear Image wipes it, File > Save My Doodle keeps it.'); }}>Help Topics</button>
+                <button className="dropdown-item" onClick={() => { setOpenMenu(null); setDialog('Moaz Sholook Paint, version 4.0 (portfolio edition).'); }}>About Paint</button>
+              </div>
+            )}
+          </div>
+          {['Image', 'Colors'].map((m) => (
             <button key={m} className="menu-item" onClick={() => wetPaint(m)}>
               {m}
             </button>
@@ -326,7 +574,7 @@ function App() {
                 title={t.label}
                 aria-label={t.label}
                 className={`tool ${activeTool === t.id ? 'tool-active' : 'raise-btn'}`}
-                onClick={() => setActiveTool(t.id)}
+                onClick={() => pickTool(t.id)}
               >
                 <ToolIcon id={t.id} />
               </button>
@@ -336,12 +584,19 @@ function App() {
           <div
             className="canvas sunken"
             ref={canvasRef}
-            style={{ cursor: activeCursor }}
+            style={{ cursor: activeCursor, zoom: zoomed ? 1.25 : 1 } as React.CSSProperties}
             onMouseMove={(e) => {
               const r = canvasRef.current?.getBoundingClientRect();
               if (r) setCoords(`${Math.round(e.clientX - r.left)}, ${Math.round(e.clientY - r.top)}`);
             }}
           >
+            <DrawLayer
+              ref={drawRef}
+              tool={activeTool}
+              color={accent}
+              onPick={setAccent}
+              onText={() => window.prompt('Text to paint:')}
+            />
             {/* hero */}
             <section className="hero">
               <svg className="doodle-sun" viewBox="0 0 60 60" aria-hidden>
@@ -368,6 +623,7 @@ function App() {
                 <a className="btn95 raise-btn" href="https://www.linkedin.com/in/moazsholook/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
                 <a className="btn95 raise-btn" href="mailto:msholook@gmail.com">Email</a>
               </div>
+              <p className="hint-line">Psst: this page is a real canvas. Grab the pencil on the left, pick a color below, and doodle on me.</p>
             </section>
 
             {/* about */}
@@ -524,7 +780,7 @@ function App() {
 
         {/* status bar */}
         <div className="statusbar">
-          <span className="status-cell status-wide">For Help, click Help Topics on the Help Menu.</span>
+          <span className="status-cell status-wide">{toolHints[activeTool] || ''}</span>
           <span className="status-cell">{coords}px</span>
           <span className="status-cell">{accent.toUpperCase()}</span>
         </div>
@@ -532,7 +788,24 @@ function App() {
 
       {/* taskbar */}
       <div className="taskbar">
-        <button className="start-btn raise-btn" onClick={() => setDialog('Where would you like to go today?')}>
+        {startOpen && (
+          <>
+            <div className="menu-overlay" onClick={() => setStartOpen(false)} />
+            <div className="start-menu raise">
+              <div className="start-side"><span>Moaz 95</span></div>
+              <div className="start-items">
+                {['About', 'Work', 'Extracurriculars', 'Skills', 'Projects', 'Contact'].map((sec) => (
+                  <a key={sec} className="dropdown-item" href={`#${sec.toLowerCase()}`} onClick={() => setStartOpen(false)}>{sec}</a>
+                ))}
+                <div className="dropdown-sep" />
+                <a className="dropdown-item" href="https://wchews.onrender.com" target="_blank" rel="noopener noreferrer" onClick={() => setStartOpen(false)}>Run Wchews...</a>
+                <a className="dropdown-item" href={resumePDF} target="_blank" rel="noopener noreferrer" onClick={() => setStartOpen(false)}>Open Resume</a>
+                <button className="dropdown-item" onClick={() => { setStartOpen(false); drawRef.current?.clear(); }}>Clear Doodles</button>
+              </div>
+            </div>
+          </>
+        )}
+        <button className="start-btn raise-btn" onClick={() => setStartOpen((o) => !o)}>
           <span className="start-logo" aria-hidden>
             <i className="p1" /><i className="p2" /><i className="p3" /><i className="p4" />
           </span>
