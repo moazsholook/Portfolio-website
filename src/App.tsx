@@ -9,6 +9,8 @@ import terminalLogo from './terminal-logo.svg';
 import ecolensImg from './ecolens-screenshot.png';
 import insulinPumpImg from './insulin-pump-screenshot.png';
 import jingeImg from './jinge-gallery.jpg';
+import wchewsImg from './wchews-screenshot.jpg';
+import batchhatchImg from './batchhatch-screenshot.jpg';
 
 /* ---------------------------------- data ---------------------------------- */
 
@@ -78,6 +80,7 @@ const projects: Project[] = [
     description:
       'Scan a meal and get a 0–100 score with a verdict from CERTIFIED L NIBBLES to ABSOLUTE CINEMA. No ML — every stat is a hand-built OpenCV measurement, served with a roast, a meme and Discord sharing.',
     tech: ['Python', 'Flask', 'OpenCV', 'NumPy'],
+    image: wchewsImg,
     links: [
       { label: 'Live Demo', url: 'https://wchews.onrender.com' },
       { label: 'Devpost', url: 'https://devpost.com/software/wchews' },
@@ -94,6 +97,18 @@ const projects: Project[] = [
       { label: 'GitHub', url: 'https://github.com/catOnKeyboardd/TheAffair' },
       { label: 'Demo', url: 'https://youtu.be/tUfkN8cRu10' },
       { label: 'Devpost', url: 'https://devpost.com/software/jinge' },
+    ],
+  },
+  {
+    name: 'BatchHatch',
+    badge: 'Hack the Hill 2026 · CGI Challenge',
+    description:
+      "Fix the bill while the customer is still on the phone. A browser-based billing correction tool that runs a port of a 1998 COBOL rating engine in 15 ms and queues the fix as an 80-column batch record.",
+    tech: ['TypeScript', 'Next.js', 'COBOL port'],
+    image: batchhatchImg,
+    links: [
+      { label: 'GitHub', url: 'https://github.com/omarismail-cs/BatchHatch' },
+      { label: 'Devpost', url: 'https://devpost.com/software/batchhatch' },
     ],
   },
   {
